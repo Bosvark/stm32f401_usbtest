@@ -18,6 +18,13 @@ SOURCES_ASM += startup_stm32f401xc.s
 SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
 SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
 SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c
+SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c
+SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2s.c
+SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
+SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
+SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+SOURCES_C   += $(CUBEDIR)/Drivers/BSP/STM32F401-Discovery/stm32f401_discovery.c
 SOURCES_C   += $(wildcard $(SRCDIR)/*.c)
 
 SOURCES_LD  := $(wildcard $(LDDIR)/*.ld)
@@ -34,6 +41,7 @@ INCLUDES    += -I$(INCDIR)
 INCLUDES    += -I$(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Inc
 INCLUDES    += -I$(CUBEDIR)/Drivers/CMSIS/Device/ST/STM32F4xx/Include
 INCLUDES    += -I$(CUBEDIR)/Drivers/CMSIS/Include
+INCLUDES    += -I$(CUBEDIR)/Drivers/BSP/STM32F401-Discovery
 
 BASEFLAGS = -mcpu=cortex-m4 -mthumb -mthumb-interwork -O0 -Wall  -g3 
 COMPFLAGS = -DSTM32F401xC -DHSE_VALUE=8000000 -DDEBUG
