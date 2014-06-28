@@ -1,7 +1,12 @@
 #include "main.h"
 #include "stm32f401_discovery.h"
 
-USBD_HandleTypeDef  hUSBDDevice;
+#include <usbd_core.h>
+#include <usbd_cdc.h>
+#include <usbd_cdc_if_template.h>
+#include <usbd_desc.h>
+
+USBD_HandleTypeDef USBD_Device;
 
 static void SystemClock_Config(void);
 
@@ -11,12 +16,13 @@ int main(void)
 	BSP_LED_Init(LED4);
 
 	SystemClock_Config();
-/*
-	USBD_Init(&hUSBDDevice, &VCP_Desc, 0);
-	USBD_RegisterClass(&hUSBDDevice, &USBD_CDC);
-	USBD_CDC_RegisterInterface(&hUSBDDevice, &USBD_CDC_fops);
-	USBD_Start(&hUSBDDevice);
-*/
+
+	USBD_Init(&USBD_Device, &VCP_Desc, 0);
+
+	USBD_RegisterClass(&USBD_Device, &USBD_CDC);
+	USBD_CDC_RegisterInterface(&USBD_Device, &USBD_CDC_Template_fops);
+	USBD_Start(&USBD_Device);
+
 	BSP_LED_Off(LED4);
 
 	for(;;){
