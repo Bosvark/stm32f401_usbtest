@@ -155,11 +155,13 @@ SECTIONS
   
 
   /* Remove information from the standard libraries */
+  /* DO: I added libnosys.a ( * ) below based on http://stackoverflow.com/questions/13235748/linker-error-on-a-c-project-using-eclipse*/
   /DISCARD/ :
   {
     libc.a ( * )
     libm.a ( * )
     libgcc.a ( * )
+    libnosys.a ( * )
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }

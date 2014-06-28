@@ -12,6 +12,14 @@ PREFIX ?=
 ARMGNU ?= $(PREFIX)arm-none-eabi
 
 FLOAT_TYPE=hard
+
+INCLUDES    += -I$(INCDIR)
+INCLUDES    += -I$(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Inc
+INCLUDES    += -I$(CUBEDIR)/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+INCLUDES    += -I$(CUBEDIR)/Drivers/CMSIS/Include
+INCLUDES    += -I$(CUBEDIR)/Drivers/BSP/STM32F401-Discovery
+INCLUDES    += -I$(CUBEDIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+INCLUDES    += -I$(CUBEDIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
  
 # source files
 SOURCES_ASM += startup_stm32f401xc.s
@@ -24,7 +32,10 @@ SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2s.c
 SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
 SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
 SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+SOURCES_C   += $(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c
 SOURCES_C   += $(CUBEDIR)/Drivers/BSP/STM32F401-Discovery/stm32f401_discovery.c
+SOURCES_C   += $(wildcard $(CUBEDIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/*.c)
+SOURCES_C   += $(wildcard $(CUBEDIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/*.c)
 SOURCES_C   += $(wildcard $(SRCDIR)/*.c)
 
 SOURCES_LD  := $(wildcard $(LDDIR)/*.ld)
@@ -36,15 +47,8 @@ OBJS	+= $(patsubst %.s,%.o,$(SOURCES_ASM))
     	     
 # Build flags
 DEPENDFLAGS := -MD -MP
-
-INCLUDES    += -I$(INCDIR)
-INCLUDES    += -I$(CUBEDIR)/Drivers/STM32F4xx_HAL_Driver/Inc
-INCLUDES    += -I$(CUBEDIR)/Drivers/CMSIS/Device/ST/STM32F4xx/Include
-INCLUDES    += -I$(CUBEDIR)/Drivers/CMSIS/Include
-INCLUDES    += -I$(CUBEDIR)/Drivers/BSP/STM32F401-Discovery
-
 BASEFLAGS = -mcpu=cortex-m4 -mthumb -mthumb-interwork -O0 -Wall  -g3 
-COMPFLAGS = -DSTM32F401xC -DHSE_VALUE=8000000 -DDEBUG
+COMPFLAGS = -DUSE_HAL_DRIVER -DUSE_USB_FS -DSTM32F401xC -DHSE_VALUE=8000000 -DDEBUG
 LDFLAGS   += $(LDS) -Xlinker --gc-sections -L"$(LDDIR)"
 #-nostartfiles -nostdlib 
 ifeq ($(FLOAT_TYPE), hard)
