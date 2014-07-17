@@ -50,7 +50,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
   
-  if(hpcd->Instance == USB_OTG_FS)
+//  if(hpcd->Instance == USB_OTG_FS)
   {
     /* Configure USB FS GPIOs */
     __GPIOA_CLK_ENABLE();
@@ -185,7 +185,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
   */
 void HAL_PCD_MspDeInit(PCD_HandleTypeDef *hpcd)
 {
-  if(hpcd->Instance == USB_OTG_FS)
+//  if(hpcd->Instance == USB_OTG_FS)
   {  
     /* Disable USB FS Clocks */ 
     __USB_OTG_FS_CLK_DISABLE();
@@ -600,6 +600,16 @@ uint32_t USBD_LL_GetRxDataSize(USBD_HandleTypeDef *pdev, uint8_t  ep_addr)
 void  USBD_LL_Delay(uint32_t Delay)
 {
   HAL_Delay(Delay);  
+}
+
+void *USBD_malloc(uint32_t size)
+{
+	static uint32_t mem[MAX_STATIC_ALLOC_SIZE];
+	return mem;
+}
+
+void USBD_free(void *p)
+{
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

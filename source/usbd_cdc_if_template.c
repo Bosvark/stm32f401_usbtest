@@ -88,6 +88,17 @@ USBD_CDC_LineCodingTypeDef linecoding =
     0x08    /* nb. of bits 8*/
   };
 
+extern USBD_HandleTypeDef USBD_Device;
+
+static struct
+{
+    uint8_t Buffer[CDC_DATA_HS_OUT_PACKET_SIZE];
+    int Position, Size;
+    char ReadDone;
+} s_RxBuffer;
+
+char g_VCPInitialized;
+
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -98,10 +109,10 @@ USBD_CDC_LineCodingTypeDef linecoding =
   */
 static int8_t TEMPLATE_Init(void)
 {
-  /*
-     Add your initialization code here 
-  */  
-  return (0);
+	USBD_CDC_SetRxBuffer(&USBD_Device, s_RxBuffer.Buffer);
+	g_VCPInitialized = 1;
+
+	return (0);
 }
 
 /**
@@ -205,21 +216,57 @@ static int8_t TEMPLATE_Control  (uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t TEMPLATE_Receive (uint8_t* Buf, uint32_t *Len)
 {
- 
-  return (0);
+	s_RxBuffer.Position = 0;
+	s_RxBuffer.Size = *Len;
+	s_RxBuffer.ReadDone = 1;
+	return (0);
+}
+int VCP_read(void *pBuffer, int size)
+{
+    if (!s_RxBuffer.ReadDone)
+        return 0;
+
+    int remaining = s_RxBuffer.Size - s_RxBuffer.Position;
+    int todo = MIN(remaining, size);
+    if (todo <= 0)
+        return 0;
+
+    memcpy(pBuffer, s_RxBuffer.Buffer + s_RxBuffer.Position, todo);
+    s_RxBuffer.Position += todo;
+    if (s_RxBuffer.Position >= s_RxBuffer.Size)
+    {
+        s_RxBuffer.ReadDone = 0;
+        USBD_CDC_ReceivePacket(&USBD_Device);
+    }
+
+    return todo;
 }
 
-/**
-  * @}
-  */ 
+int VCP_write(const void *pBuffer, int size)
+{
+    if (size > CDC_DATA_HS_OUT_PACKET_SIZE)
+    {
+        int offset;
+        for (offset = 0; offset < size; offset++)
+        {
+            int todo = MIN(CDC_DATA_HS_OUT_PACKET_SIZE,
+                           size - offset);
+            int done = VCP_write(((char *)pBuffer) + offset, todo);
+            if (done != todo)
+                return offset + done;
+        }
 
-/**
-  * @}
-  */ 
+        return size;
+    }
 
-/**
-  * @}
-  */ 
+    USBD_CDC_HandleTypeDef *pCDC =
+            (USBD_CDC_HandleTypeDef *)USBD_Device.pClassData;
+    while(pCDC->TxState) { } //Wait for previous transfer
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+    USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t *)pBuffer, size);
+    if (USBD_CDC_TransmitPacket(&USBD_Device) != USBD_OK)
+        return 0;
 
+    while(pCDC->TxState) { } //Wait until transfer is done
+    return size;
+}

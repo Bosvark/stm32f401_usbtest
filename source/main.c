@@ -25,9 +25,20 @@ int main(void)
 
 	BSP_LED_Off(LED4);
 
+	char byte;
 	for(;;){
+/*
 		BSP_LED_Toggle(LED4);
 		HAL_Delay(500);
+*/
+		if (VCP_read(&byte, 1) != 1)
+			continue;
+
+		BSP_LED_Toggle(LED4);
+		VCP_write("\r\nYou typed ", 12);
+		VCP_write(&byte, 1);
+		VCP_write("\r\n", 2);
+		BSP_LED_Toggle(LED4);
 	}
 }
 
@@ -85,3 +96,141 @@ static void SystemClock_Config(void)
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2);
 }
 
+#include <errno.h>
+caddr_t _sbrk(int incr)
+{
+  extern char _estack; /* Defined by the linker. */
+  extern char _Min_Heap_Size; /* Defined by the linker. */
+  static char* current_heap_end;
+  char* current_block_address;
+
+  if (current_heap_end == 0)
+    current_heap_end = &_estack;;
+
+  current_block_address = current_heap_end;
+
+  // Need to align heap to word boundary, else will get
+  // hard faults on Cortex-M0. So we assume that heap starts on
+  // word boundary, hence make sure we always add a multiple of
+  // 4 to it.
+  incr = (incr + 3) & (~3); // align value to 4
+  if (current_heap_end + incr > &_Min_Heap_Size)
+    {
+      // Some of the libstdc++-v3 tests rely upon detecting
+      // out of memory errors, so do not abort here.
+#if 0
+      extern void abort (void);
+
+      _write (1, "_sbrk: Heap and stack collision\n", 32);
+
+      abort ();
+#else
+      // Heap has overflowed
+      errno = ENOMEM;
+      return (caddr_t) - 1;
+#endif
+    }
+
+  current_heap_end += incr;
+
+  return (caddr_t) current_block_address;
+}
+
+extern PCD_HandleTypeDef hpcd;
+
+void OTG_FS_IRQHandler(void)
+{
+	HAL_PCD_IRQHandler(&hpcd);
+}
+/*
+dieter@dieter-dev:~$ lsusb -D /dev/bus/usb/002/011
+Device: ID 0483:5740 STMicroelectronics STM32F407
+Couldn't open device, some information will be missing
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0        64
+  idVendor           0x0483 STMicroelectronics
+  idProduct          0x5740 STM32F407
+  bcdDevice            2.00
+  iManufacturer           1
+  iProduct                2
+  iSerial                 3
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           67
+    bNumInterfaces          2
+    bConfigurationValue     1
+    iConfiguration          0
+    bmAttributes         0xc0
+      Self Powered
+    MaxPower              100mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           1
+      bInterfaceClass         2 Communications
+      bInterfaceSubClass      2 Abstract (modem)
+      bInterfaceProtocol      1 AT-commands (v.25ter)
+      iInterface              0
+      CDC Header:
+        bcdCDC               1.10
+      CDC Call Management:
+        bmCapabilities       0x00
+        bDataInterface          1
+      CDC ACM:
+        bmCapabilities       0x02
+          line coding and serial state
+      CDC Union:
+        bMasterInterface        0
+        bSlaveInterface         1
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x82  EP 2 IN
+        bmAttributes            3
+          Transfer Type            Interrupt
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0008  1x 8 bytes
+        bInterval              16
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        1
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass        10 CDC Data
+      bInterfaceSubClass      0 Unused
+      bInterfaceProtocol      0
+      iInterface              0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x01  EP 1 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+
+ */

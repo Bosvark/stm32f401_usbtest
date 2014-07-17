@@ -24,21 +24,16 @@
   *
   ******************************************************************************
   */
-
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_CDC_IF_TEMPLATE_H
 #define __USBD_CDC_IF_TEMPLATE_H
 
-/* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
 
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-
+int VCP_read(void *pBuffer, int size);
+int VCP_write(const void *pBuffer, int size);
+extern char g_VCPInitialized;
 extern USBD_CDC_ItfTypeDef  USBD_CDC_Template_fops;
 
-/* Exported macro ------------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
 #endif /* __USBD_CDC_IF_TEMPLATE_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -47,8 +47,12 @@
  
 /* Exported macro ------------------------------------------------------------*/
 /* Memory management macros */
-#define USBD_malloc               malloc
-#define USBD_free                 free
+#define MAX_STATIC_ALLOC_SIZE 4 /* HID Class structure size */
+#define USBD_malloc				USBD_static_malloc
+#define USBD_free				USBD_static_free
+
+//#define USBD_malloc               malloc
+//#define USBD_free                 free
 #define USBD_memset               memset
 #define USBD_memcpy               memcpy
     

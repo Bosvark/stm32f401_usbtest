@@ -39,7 +39,7 @@ SOURCES_C   += $(wildcard $(CUBEDIR)/Middlewares/ST/STM32_USB_Device_Library/Cor
 SOURCES_C   += $(wildcard $(CUBEDIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/*.c)
 SOURCES_C   += $(wildcard $(SRCDIR)/*.c)
 
-SOURCES_LD  := $(wildcard $(LDDIR)/*.ld)
+SOURCES_LD  := $(LDDIR)/STM32F401CC_FLASH.ld
  
 # object files
 LDS	+= $(patsubst %.ld,-T%.ld,$(SOURCES_LD))
@@ -50,7 +50,8 @@ OBJS	+= $(patsubst %.s,%.o,$(SOURCES_ASM))
 DEPENDFLAGS := -MD -MP
 BASEFLAGS = -mcpu=cortex-m4 -mthumb -mthumb-interwork -O0 -Wall  -g3 
 COMPFLAGS = -DUSE_HAL_DRIVER -DUSE_USB_FS -DSTM32F401xC -DHSE_VALUE=8000000 -DDEBUG
-LDFLAGS   += $(LDS) -Xlinker --gc-sections -L"$(LDDIR)"
+LDFLAGS   += $(LDS) -Xlinker --gc-sections
+# -L"$(LDDIR)"
 #-nostartfiles -nostdlib 
 ifeq ($(FLOAT_TYPE), hard)
 BASEFLAGS += -fsingle-precision-constant -Wdouble-promotion
